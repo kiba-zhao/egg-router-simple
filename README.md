@@ -50,11 +50,9 @@ exports.routerSimple = {
 };
 ```
 
-see [config/config.default.js](config/config.default.js) for more detail.
-
 ## Example
 
-<!-- example here -->
+see [README.zh_CN.md](README.zh_CN.md) for more detail.
 
 ## Questions & Suggestions
 

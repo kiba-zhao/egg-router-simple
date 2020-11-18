@@ -20,9 +20,15 @@
 [download-image]: https://img.shields.io/npm/dm/egg-router-simple.svg?style=flat-square
 [download-url]: https://npmjs.org/package/egg-router-simple
 
-<!--
-Description here.
--->
+提供简单设置restful接口路由的方法．减少重复的controller代码开发．
+
+
+## 安装
+
+```bash
+$ npm install git+ssh://git@github.com:kiba-zhao/egg-router-simple.git --save
+```
+
 
 ## 依赖说明
 
@@ -53,9 +59,8 @@ exports.routerSimple = {
 };
 ```
 
-## 使用场景
-
-- 通过router设置使用接口需要使用的service业务函数，避免书写大量重复的controller代码文件
+## 使用说明
+ 通过router设置接口需要使用的service业务函数．
 
 ### 路由設置 ###
 
