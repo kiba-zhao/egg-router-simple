@@ -27,7 +27,7 @@ Description here.
 ## Install
 
 ```bash
-$ npm install git+ssh://git@github.com:kiba-zhao/egg-router-simple.git --save
+$ npm install git://github.com/kiba-zhao/egg-router-simple.git --save
 ```
 
 ## Usage
@@ -40,15 +40,282 @@ exports.routerSimple = {
 };
 ```
 
-## Configuration
+## 使用说明
+ 通过router设置接口需要使用的service业务函数．
 
-```js
-// {app_root}/config/config.default.js
-exports.routerSimple = {
-  enable: true,
-  package: 'egg-router-simple',
+### 路由設置 ###
+
+``` javascript
+// app/router.js
+
+module.exports = app => {
+  const { router } = app;
+
+  router.simple('/simple', 'simple');
 };
+
+
 ```
+
+同等于如下代码功能：
+
+``` javascript
+// app/router.js
+module.exports = app => {
+    const { router, controller } = app;
+
+    // 列出所有资源
+    if(controller.simple.index)
+        router.get('/simples', controller.simple.index);
+    // 新建一个资源
+    if(controller.simple.post)
+        router.post('/simples', controller.simple.post);
+    // 获取一个资源内容
+    if(controller.simple.get)
+        router.get('/simples/:id', controller.simple.get);
+    // 更新一个资源内容
+    if(controller.simple.put)
+        router.put('/simples/:id', controller.simple.put);
+    // 更新一个资源的部分内容
+    if(controller.simple.patch)
+        router.patch('/simples/:id', controller.simple.patch);
+    // 删除某个资源
+    if(controller.simple.delete)
+        router.delete('/simples/:id', controller.simple.delete);
+    // 删除所有资源
+    if(controller.simple.clean)
+        router.delete('/simples', controller.simple.clean);
+    // 获取某个资源的元信息(返回数据格式，内容大小)
+    if(controller.simple.head)
+        router.head('/simples/:id', controller.simple.head);
+    // 获取某个资源的相关信息
+    if(controller.simple.options)
+        router.options('/simples/:id', controller.simple.options);
+    // 获取资源的相关信息
+    if(controller.simple.allow)
+        router.options('/simples', controller.simple.allow);
+};
+
+
+
+// app/controller/simple.js
+const { Controller } = require('egg');
+const OPTIONS = Symbol('CONTROLLER_OPTIONS');
+const ALLOW_OPTIONS = Symbol('CONTROLLER_ALLOW_OPTIONS');
+
+class SimpleController extends Controller {
+
+    constructor(...args){
+        super(...args);
+
+        const options = ['OPTIONS'];
+        const allow_options = options.slice(0);
+
+        if(this.index)
+            allow_options.push('GET');
+        if(this.clean)
+            allow_options.push('DELETE');
+        if(this.post)
+            allow_options.push('POST');
+
+        if(this.get)
+            options.push('GET');
+        if(this.head)
+            options.push('HEAD');
+        if(this.put)
+            options.push('PUT');
+        if(this.patch)
+            options.push('PATCH');
+        if(this.delete)
+            options.push('DELETE');
+
+        this[OPTIONS] = options.join(', ');
+        this[ALLOW_OPTIONS] = allow_options.join(', ');
+    }
+
+   /**
+    * 列出所有资源
+    */
+    async index(){
+        const { ctx } = this;
+        const res = await ctx.service.simple.find(ctx.query,ctx.params);
+        ctx.body = res;
+    }
+
+  /**
+   * 新建一个资源
+   */
+    async post() {
+        const { ctx } = this;
+        const res = await ctx.service.simple.createOne(ctx.request.body,ctx.params);
+        if (!res) { return; }
+        ctx.body = res;
+        ctx.status = 201;
+    }
+
+  /**
+   * 获取一个资源内容
+   */
+    async get() {
+        const { ctx } = this;
+        const {id,...opts} = ctx.params;
+        const res = await ctx.service.simple.findOne({...ctx.query,id},opts);
+        if (!res) { return; }
+        ctx.body = res;
+    }
+
+   /**
+    * 更新某个资源内容
+    */
+    async put() {
+        const { ctx } = this;
+        const {id,...opts} = ctx.params;
+        const res = await ctx.service.simple.replaceOne({...ctx.request.body,id},{...ctx.query,id},opts);
+        if (!res) { return; }
+        ctx.body = res;
+        ctx.status = 200;
+    }
+
+   /**
+    * 更新某个资源的部分内容
+    */
+    async patch() {
+        const { ctx } = this;
+        const {id,...opts} = ctx.params;
+        const res = await ctx.service.simple.updateOne(ctx.request.body,{...ctx.query,id},opts);
+        if (!res) { return; }
+        ctx.body = res;
+        ctx.status = 200;
+    }
+
+   /**
+    * 删除某个资源
+    */
+    async delete() {
+        const { ctx } = this;
+        const {id,...opts} = ctx.params;
+        const res = await ctx.service.simple.deleteOne({...ctx.query,id},opts);
+        if (!res) { return; }
+        ctx.status = 204;
+    }
+
+   /**
+    * 删除所有资源
+    */
+    async clean() {
+        const { ctx } = this;
+        const res = await ctx.service.simple.deleteAll(ctx.query,ctx.params);
+        if (!res) { return; }
+        ctx.status = 204;
+    }
+
+   /**
+    * 获取某个资源的元信息(返回数据格式，内容大小)
+    */
+    async head() {
+        const { ctx } = this;
+        const {id,...opts} = ctx.params;
+        const res = await ctx.service.simple.findOne({...ctx.query,id},opts);
+        if (!res) { return; }
+        const buffer = Buffer.form(JSON.stringify(res));
+        ctx.set({
+            'Content-Type': 'application/json; charset=utf-8',
+            'Content-length': buffer.byteLength,
+        });
+        ctx.status = 200;
+    }
+
+   /**
+    * 获取某个资源的相关信息
+    */
+    async options(){
+        const { ctx } = this;
+        ctx.set({
+            'Allow': this[OPTIONS],
+        });
+        ctx.status = 200;
+    }
+
+   /**
+    * 获取资源的相关信息
+    */
+    async allow(){
+        const { ctx } = this;
+        ctx.set({
+            'Allow': this[ALLOW_OPTIONS],
+        });
+        ctx.status = 200;
+    }
+
+}
+
+```
+
+
+### 服務接口說明 ###
+
+``` javascript
+const { Service } = require('egg');
+class SimpleService extends Service {
+
+  /**
+   * 列出匹配条件的所有资源
+   * @param {Object} condition 匹配条件
+   * @param {Object} opts 可选项
+   */
+   async find(condition,opts) {}
+
+  /**
+   * 获取一个匹配的资源
+   * @param {Object} condition 匹配条件
+   * @param {Object} opts 可选项   
+   */
+   async findOne(condition,opts) {}
+
+  /**
+   * 新建一个资源
+   * @param {Object} entity 资源内容
+   * @param {Object} opts 可选项      
+   */
+   async createOne(entity,opts) {}
+
+  /**
+   * 更新一个匹配资源的内容
+   * @param {Object} entity 更新资源内容
+   * @param {Object} condition 匹配条件
+   * @param {Object} opts 可选项
+   */
+   async replaceOne(entity,condition,opts){}
+
+  /**
+   * 更新一个匹配资源的部分内容
+   * @param {Object} entity 更新资源内容
+   * @param {Object} condition 匹配条件
+   * @param {Object} opts 可选项
+   */
+   async updateOne(entity,condition,opts){}
+
+  /**
+   * 销毁一个匹配的资源
+   * @param {Object} condition 匹配条件
+   * @param {Object} opts 可选项
+   */
+   async deleteOne(condition,opts) {}
+
+  /**
+   * 销毁匹配的所有资源
+   * @param {Object} condition 匹配条件
+   * @param {Object} opts 可选项
+   */
+   async deleteAll(condition,opts) {}
+
+}
+
+```
+
+## 详细配置
+
+请到 [config/config.default.js](config/config.default.js) 查看详细配置项说明。
 
 ## Example
 

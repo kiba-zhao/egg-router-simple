@@ -26,7 +26,7 @@
 ## 安装
 
 ```bash
-$ npm install git+ssh://git@github.com:kiba-zhao/egg-router-simple.git --save
+$ npm install git://github.com/kiba-zhao/egg-router-simple.git --save
 ```
 
 
@@ -38,16 +38,6 @@ egg-router-simple 版本 | egg 1.x
 --- | ---
 1.x | 😁
 0.x | ❌
-
-### 依赖的插件
-<!--
-
-如果有依赖其它插件，请在这里特别说明。如
-
-- security
-- multipart
-
--->
 
 ## 开启插件
 
