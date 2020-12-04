@@ -20,9 +20,7 @@
 [download-image]: https://img.shields.io/npm/dm/egg-router-simple.svg?style=flat-square
 [download-url]: https://npmjs.org/package/egg-router-simple
 
-<!--
-Description here.
--->
+支持将符合约定的接口路由，直接与service业务逻辑层函数做绑定设置．减少创建重复固定的controller层代码.
 
 ## Install
 
